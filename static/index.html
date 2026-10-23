@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>太虚野生动物园 · Tai Xu Safari</title>
+    <meta
+      name="description"
+      content="一个用 taixu 游戏后端库驱动的 3D 野生动物园网页游戏。"
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="world" aria-label="3D 野生动物园"></canvas>
+      <div class="vignette"></div>
+      <div class="grain"></div>
+
+      <!-- ============================== HUD ============================== -->
+      <header id="topbar">
+        <div class="brand">
+          <div class="brand-mark">☀</div>
+          <div class="brand-text">
+            <h1>太虚野生动物园</h1>
+            <p>TAI XU SAFARI · 巡护日志</p>
+          </div>
+        </div>
+
+        <button id="park-pill" class="park-pill" data-open="profile" title="切换园区">
+          <span class="park-dot"></span>
+          <span id="park-name">金合欢草原</span>
+          <span class="park-switch">更换</span>
+        </button>
+
+        <div class="stats">
+          <div class="stat" title="金币"><span>🪙</span><b id="stat-coins">—</b></div>
+          <div class="stat" title="胶片"><span>🎞</span><b id="stat-film">—</b></div>
+          <div class="stat" title="动物零食"><span>🥕</span><b id="stat-snack">—</b></div>
+          <div class="stat battery-stat" title="相机电量">
+            <span>🔋</span>
+            <div class="battery"><i id="battery-fill"></i></div>
+            <b id="stat-battery">—</b>
+          </div>
+        </div>
+
+        <button id="profile" class="profile" data-open="profile">
+          <span class="avatar" id="avatar-face">🧑‍🌾</span>
+          <span class="profile-text">
+            <b id="profile-name">巡护员</b>
+            <small id="profile-level">Lv.1</small>
+          </span>
+        </button>
+      </header>
+
+      <button id="ann-ticker" class="ann-ticker hidden">
+        <span class="ticker-label">公告</span>
+        <span id="ticker-text"></span>
+        <span class="ticker-arrow">→</span>
+      </button>
+
+      <!-- ============================== DOCK ============================== -->
+      <nav id="dock" aria-label="游戏菜单">
+        <button data-open="tasks" class="dock-btn"><span>🧭</span><em>任务</em><i class="badge" id="badge-tasks"></i></button>
+        <button data-open="album" class="dock-btn"><span>📖</span><em>图鉴</em><i class="badge" id="badge-album"></i></button>
+        <button data-open="shop" class="dock-btn"><span>🛒</span><em>补给</em></button>
+        <button data-open="social" class="dock-btn"><span>📻</span><em>电台</em><i class="badge" id="badge-social"></i></button>
+        <button data-open="guide" class="dock-btn"><span>🧑‍🌾</span><em>向导</em></button>
+        <button data-open="ranking" class="dock-btn"><span>🏆</span><em>排行</em></button>
+        <button data-open="news" class="dock-btn"><span>📣</span><em>公告</em><i class="badge" id="badge-news"></i></button>
+        <button data-open="profile" class="dock-btn"><span>🎒</span><em>档案</em></button>
+      </nav>
+
+      <!-- ========================== INTERACTION ========================== -->
+      <div id="interact" class="interact hidden">
+        <div class="interact-animal">
+          <span id="interact-rarity" class="rarity-dot"></span>
+          <b id="interact-name">动物</b>
+          <small id="interact-meta"></small>
+        </div>
+        <div class="interact-keys">
+          <button id="btn-photo" class="key-action" title="拍照 (E)">
+            <kbd>E</kbd><span>拍照</span>
+          </button>
+          <button id="btn-feed" class="key-action" title="投喂 (F)">
+            <kbd>F</kbd><span>投喂</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="controls-hint" class="controls-hint">
+        <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 移动</span>
+        <span><kbd>Shift</kbd> 奔跑</span>
+        <span>拖动 环视 · 滚轮 缩放</span>
+        <span><kbd>E</kbd> 拍照 · <kbd>F</kbd> 投喂</span>
+      </div>
+
+      <!-- ============================== MOBILE ============================== -->
+      <div id="touch-controls" class="touch-controls">
+        <div id="joystick" class="joystick"><div id="joystick-knob"></div></div>
+        <div class="touch-actions">
+          <button id="touch-photo" class="touch-btn">📷</button>
+          <button id="touch-feed" class="touch-btn feed">🥕</button>
+        </div>
+      </div>
+
+      <!-- ============================== DRAWER ============================== -->
+      <section id="drawer" class="drawer" aria-hidden="true">
+        <header class="drawer-head">
+          <div>
+            <p class="eyebrow" id="drawer-eyebrow">TAIXU SAFARI</p>
+            <h2 id="drawer-title">任务</h2>
+          </div>
+          <button id="drawer-close" class="icon-btn" aria-label="关闭">✕</button>
+        </header>
+        <div id="drawer-body" class="drawer-body"></div>
+      </section>
+
+      <div id="toasts" class="toasts"></div>
+      <div id="flash" class="flash"></div>
+
+      <!-- ============================== LOGIN ============================== -->
+      <div id="login" class="screen login-screen">
+        <div class="login-card">
+          <div class="login-kicker">A TAIXU-POWERED FIELD GAME</div>
+          <h1 class="login-title">太虚<em>野生动物园</em></h1>
+          <p class="login-sub">
+            背上相机，沿着金合欢的阴影走过草原。拍下动物、投喂它们、把照片换成故事——
+            一个由 <code>taixu</code> 游戏后端库驱动的迷你 3D 世界。
+          </p>
+
+          <label class="field">
+            <span>巡护员昵称</span>
+            <input id="login-name" maxlength="16" placeholder="给自己起个名字" autocomplete="nickname" />
+          </label>
+
+          <div class="region-picker" id="region-picker">
+            <button class="region-card selected" data-region="savanna">
+              <span class="region-art savanna-art">🦒</span>
+              <b>金合欢草原</b>
+              <small>狮子 · 长颈鹿 · 斑马 · 犀牛</small>
+              <em>开阔、干燥、光线很好</em>
+            </button>
+            <button class="region-card" data-region="wetland">
+              <span class="region-art wetland-art">🦩</span>
+              <b>湿地河谷</b>
+              <small>大象 · 火烈鸟 · 河马</small>
+              <em>芦苇、浅滩与观鸟塔</em>
+            </button>
+          </div>
+
+          <button id="login-btn" class="primary-btn wide">进入园区</button>
+          <p class="login-foot">
+            演示模式的登录只携带一个受信任的账号 ID；真实部署时鉴权应由网关完成。
+          </p>
+        </div>
+      </div>
+
+      <!-- ============================== BOOT ============================== -->
+      <div id="boot" class="boot">
+        <div class="boot-mark">☀</div>
+        <div class="boot-text">正在装载园区…</div>
+      </div>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

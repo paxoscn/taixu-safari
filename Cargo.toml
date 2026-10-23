@@ -1,0 +1,23 @@
+[package]
+name = "taixu-safari"
+version = "0.1.0"
+edition = "2021"
+description = "A small 3D wildlife safari web game built on the taixu game backend library"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+taixu = { path = "../taixu" }
+axum = "0.8"
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+async-trait = "0.1"
+tower-http = { version = "0.6", features = ["fs", "trace"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 2
